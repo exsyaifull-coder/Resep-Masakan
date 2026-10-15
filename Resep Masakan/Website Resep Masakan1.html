@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dapur Kita — Resep Jajanan Favorit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #FFF8F0;
+      --surface:   #FFFFFF;
+      --brown:     #6B4F0E;   /* warna olive/gold tua */
+      --amber:     #8C6A14;
+      --gold:      #E8A830;
+      --cream:     #F5E6D0;
+      --muted:     #6B5B3F;
+      --border:    #C9B98A;
+      --text:      #2A1508;
+      --card-bg:   #D9D9D9;   
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--brown);
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 16px rgba(107,79,14,.45);
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      letter-spacing: .02em;
+    }
+    nav { display: flex; gap: 1.5rem; }
+    nav a {
+      color: var(--cream);
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      opacity: .8;
+      transition: opacity .2s;
+    }
+    nav a:hover { opacity: 1; color: var(--gold); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--brown);
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(232,168,48,.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .75rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      color: #fff;
+      line-height: 1.1;
+      max-width: 700px;
+      margin: 0 auto .8rem;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .hero p {
+      color: var(--cream);
+      opacity: .85;
+      max-width: 480px;
+      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    /* ── SECTION ── */
+    .section-title-wrap {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+    }
+    .section-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: .5rem;
+    }
+    .section-title-wrap h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--brown);
+    }
+
+    /* ── RECIPE CARDS ── */
+    .recipes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0;            
+      overflow: hidden;
+      border: 1px solid #BFBFBF;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+      transition: transform .25s, box-shadow .25s;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.16);
+    }
+
+    /* Slot gambar resep — ganti background-image di sini atau via <img> */
+    .card-thumb {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #C4C4C4;
+      overflow: hidden;
+    }
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Placeholder teks jika gambar belum diisi */
+    .card-thumb .placeholder-label {
+      font-size: .8rem;
+      color: #8a8a8a;
+      font-weight: 500;
+      letter-spacing: .05em;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: .75rem;
+      right: .75rem;
+      background: var(--brown);
+      color: var(--gold);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .25rem .6rem;
+      border-radius: 50px;
+      z-index: 2;
+    }
+
+    .card-body { padding: 1.25rem 1.25rem 0; flex: 1; background: var(--card-bg); }
+
+    .card-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: .6rem;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .75rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .meta-item svg { flex-shrink: 0; }
+
+    .card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--brown);
+      margin-bottom: .4rem;
+    }
+    .card p.desc {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-footer {
+      border-top: 1px solid #BFBFBF;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-bg);
+    }
+    .difficulty {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .dot.filled  { background: var(--amber); }
+    .dot.empty   { background: #BFBFBF; }
+    .diff-label  { font-size: .75rem; color: var(--muted); font-weight: 500; }
+
+    .btn-detail {
+      background: var(--amber);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .45rem 1rem;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background .2s;
+    }
+    .btn-detail:hover { background: var(--brown); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(30,20,0,.65);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      max-width: 580px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(30,20,0,.35);
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .modal-header {
+      padding: 1.5rem 1.5rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--brown);
+    }
+    .modal-header p { color: var(--muted); font-size: .875rem; margin-top: .2rem; }
+
+    .btn-close {
+      background: var(--cream);
+      border: none;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .btn-close:hover { background: var(--border); }
+
+    .modal-section { padding: 1.25rem 1.5rem; }
+    .modal-section h3 {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: .75rem;
+    }
+
+    .ingredients-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .4rem .75rem;
+    }
+    .ingredients-list li {
+      font-size: .875rem;
+      padding: .3rem 0 .3rem .8rem;
+      border-left: 2px solid var(--gold);
+      color: var(--text);
+    }
+
+    .steps-list { list-style: none; counter-reset: steps; }
+    .steps-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      margin-bottom: .75rem;
+    }
+    .steps-list li::before {
+      content: counter(steps);
+      background: var(--brown);
+      color: var(--gold);
+      font-size: .7rem;
+      font-weight: 700;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: .15rem;
+    }
+    .steps-list li span { font-size: .9rem; line-height: 1.55; }
+
+    .modal-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 1.5rem .75rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--brown);
+      text-align: center;
+      padding: 2.5rem 2rem;
+      color: var(--cream);
+      opacity: .8;
+      font-size: .8rem;
+    }
+
+    @media (max-width: 500px) {
+      .ingredients-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER ( nav umum) -->
+<header>
+  <div class="logo">Dapur Kita</div>
+  <nav>
+    <a href="#resep">Resep</a>
+    <a href="#tentang">Tentang</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Jajanan Rumahan Indonesia</p>
+  <h1>Resep Masakan<br><em>Aneka Gorengan</em></h1>
+  <p>Lima resep jajanan favorit yang mudah dibuat di rumah.</p>
+</section>
+
+<!-- RECIPE SECTION -->
+<div id="resep">
+  <div class="section-title-wrap">
+    <p class="section-label">Koleksi Resep</p>
+    <h2>Pilih Resep Favoritmu</h2>
+  </div>
+
+  <div class="recipes">
+
+    <!-- PISANG GORENG -->
+    <div class="card" onclick="openModal('pisang')">
+      <div class="card-thumb">
+        <!-- Ganti src di bawah dengan gambar Pisang Goreng -->
+        <img src="pisang.jpg" alt="Pisang Goreng" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="placeholder-label" style="display:none;">[ Gambar Pisang Goreng ]</span>
+        <span class="card-badge">Goreng</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            20 menit
+          </span>
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            4 porsi
+          </span>
+        </div>
+        <h3>Pisang Goreng</h3>
+        <p class="desc">Pisang manis dibalut adonan tepung renyah, digoreng kecokelatan — jajanan klasik yang tak pernah salah.</p>
+      </div>
+      <div class="card-footer">
+        <div class="difficulty">
+          <span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span>
+          <span class="diff-label">Mudah</span>
+        </div>
+        <button class="btn-detail">Lihat Resep →</button>
+      </div>
+    </div>
+
+    <!-- RISOL BIHUN -->
+    <div class="card" onclick="openModal('risol')">
+      <div class="card-thumb">
+        <!-- Ganti src di bawah dengan gambar Risol Bihun -->
+        <img src="risol.jpg" alt="Risol Bihun" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="placeholder-label" style="display:none;">[ Gambar Risol Bihun ]</span>
+        <span class="card-badge">Goreng</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            45 menit
+          </span>
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            6 porsi
+          </span>
+        </div>
+        <h3>Risol Bihun</h3>
+        <p class="desc">Kulit dadar tipis diisi bihun tumis bumbu, lalu dibalut tepung panir dan digoreng hingga keemasan.</p>
+      </div>
+      <div class="card-footer">
+        <div class="difficulty">
+          <span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span>
+          <span class="diff-label">Sedang</span>
+        </div>
+        <button class="btn-detail">Lihat Resep →</button>
+      </div>
+    </div>
+
+    <!-- CHEESE ROLL -->
+    <div class="card" onclick="openModal('cheese')">
+      <div class="card-thumb">
+        <!-- Ganti src di bawah dengan gambar Cheese Roll -->
+        <img src="Cheese-roll.jpg" alt="Cheese Roll" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="placeholder-label" style="display:none;">[ Gambar Cheese Roll ]</span>
+        <span class="card-badge">Gulung</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            25 menit
+          </span>
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            8 pcs
+          </span>
+        </div>
+        <h3>Cheese Roll</h3>
+        <p class="desc">Kulit lumpia gulung isu keju meleleh digoreng garing - cocok untuk camilang sore.</p>
+      </div>
+      <div class="card-footer">
+        <div class="difficulty">
+          <span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span>
+          <span class="diff-label">Sangat Mudah</span>
+        </div>
+        <button class="btn-detail">Lihat Resep →</button>
+      </div>
+    </div>
+
+    <!-- PISCOK -->
+    <div class="card" onclick="openModal('piscok')">
+      <div class="card-thumb">
+        <!-- Ganti src di bawah dengan gambar Piscok -->
+        <img src="piscok.jpg" alt="Piscok" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="placeholder-label" style="display:none;">[ Gambar Piscok ]</span>
+        <span class="card-badge">Populer</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            20 menit
+          </span>
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            6 pcs
+          </span>
+        </div>
+        <h3>Piscok</h3>
+        <p class="desc">Pisang cokelat — pisang dibalut kulit lumpia renyah dengan isian cokelat lumer yang bikin nagih setiap gigitan.</p>
+      </div>
+      <div class="card-footer">
+        <div class="difficulty">
+          <span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span>
+          <span class="diff-label">Mudah</span>
+        </div>
+        <button class="btn-detail">Lihat Resep →</button>
+      </div>
+    </div>
+
+    <!-- BAKWAN (resep ke-5) -->
+    <div class="card" onclick="openModal('bakwan')">
+      <div class="card-thumb">
+        <!-- Ganti src di bawah dengan gambar Bakwan -->
+        <img src="bakwan.jpg" alt="Bakwan" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="placeholder-label" style="display:none;">[ Gambar Bakwan ]</span>
+        <span class="card-badge">Goreng</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            25 menit
+          </span>
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            5 porsi
+          </span>
+        </div>
+        <h3>Bakwan</h3>
+        <p class="desc">Terbuat dari adonan tepung terigu yang dicampur dengan irisan sayur dengan tekstur renyah dan gurih.</p>
+      </div>
+      <div class="card-footer">
+        <div class="difficulty">
+          <span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span>
+          <span class="diff-label">Sedang</span>
+        </div>
+        <button class="btn-detail">Lihat Resep →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="tentang">
+  <p> <strong>Dapur Kita</strong> — Resep jajanan rumahan Indonesia</p>
+  <p style="margin-top:.5rem;font-size:.72rem;">Untuk kamu yang suka masak di rumah</p>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     MODALS — bahan & cara membuat
+══════════════════════════════════════════ -->
+
+<!-- MODAL PISANG GORENG -->
+<div class="modal-overlay" id="modal-pisang" onclick="closeOnOverlay(event, 'pisang')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Pisang Goreng</h2>
+        <p>20 menit &nbsp;·&nbsp; 4 porsi</p>
+      </div>
+      <button class="btn-close" onclick="closeModal('pisang')">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <h3>Bahan-Bahan</h3>
+      <ul class="ingredients-list">
+        <li>4 buah pisang kepok</li>
+        <li>150 g tepung terigu</li>
+        <li>2 sdm tepung beras</li>
+        <li>1 sdt gula pasir</li>
+        <li>½ sdt garam</li>
+        <li>½ sdt vanili bubuk</li>
+        <li>200 ml air dingin</li>
+        <li>Minyak goreng secukupnya</li>
+      </ul>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <h3>Cara Membuat</h3>
+      <ol class="steps-list">
+        <li><span>Campur tepung terigu, tepung beras, gula, garam, dan vanili dalam mangkuk besar.</span></li>
+        <li><span>Tambahkan air dingin sedikit demi sedikit, aduk hingga adonan licin dan tidak bergerindil.</span></li>
+        <li><span>Kupas pisang, belah dua memanjang atau biarkan utuh sesuai selera.</span></li>
+        <li><span>Panaskan minyak yang banyak di wajan dengan api sedang (sekitar 175°C).</span></li>
+        <li><span>Celupkan pisang ke dalam adonan hingga terbalut rata, lalu masukkan ke minyak panas.</span></li>
+        <li><span>Goreng selama 4–5 menit hingga warna kecokelatan keemasan, balik sekali di tengah waktu.</span></li>
+        <li><span>Angkat, tiriskan di atas kertas minyak. Sajikan hangat.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RISOL BIHUN -->
+<div class="modal-overlay" id="modal-risol" onclick="closeOnOverlay(event, 'risol')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Risol Bihun</h2>
+        <p>45 menit &nbsp;·&nbsp; 6 porsi</p>
+      </div>
+      <button class="btn-close" onclick="closeModal('risol')">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <h3>Bahan Kulit</h3>
+      <ul class="ingredients-list">
+        <li>100 g tepung terigu</li>
+        <li>1 butir telur</li>
+        <li>250 ml susu cair</li>
+        <li>½ sdt garam</li>
+        <li>1 sdm mentega (lelehkan)</li>
+      </ul>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <h3>Bahan Isian</h3>
+      <ul class="ingredients-list">
+        <li>100 g bihun (rendam air panas)</li>
+        <li>1 wortel (serut halus)</li>
+        <li>2 batang daun bawang</li>
+        <li>2 siung bawang putih</li>
+        <li>1 siung bawang merah</li>
+        <li>Garam, merica, kecap manis</li>
+        <li>1 butir telur (untuk balutan)</li>
+        <li>Tepung panir secukupnya</li>
+      </ul>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <h3>Cara Membuat</h3>
+      <ol class="steps-list">
+        <li><span>Buat kulit: campur semua bahan kulit, aduk rata hingga licin. Diamkan 10 menit.</span></li>
+        <li><span>Buat isian: tumis bawang putih dan bawang merah hingga harum. Masukkan wortel, tumis sebentar.</span></li>
+        <li><span>Tambahkan bihun yang sudah ditiriskan, beri kecap, garam, dan merica. Aduk rata, masak 3 menit. Angkat dan dinginkan.</span></li>
+        <li><span>Panaskan teflon anti lengket, buat dadar tipis dari adonan kulit. Sisihkan.</span></li>
+        <li><span>Isi masing-masing dadar dengan 2 sdm isian bihun, gulung rapat dan rekatkan ujungnya.</span></li>
+        <li><span>Celupkan risol ke kocokan telur, lalu gulingkan ke tepung panir hingga rata.</span></li>
+        <li><span>Goreng dalam minyak panas sedang hingga keemasan. Angkat dan tiriskan.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHEESE ROLL -->
+<div class="modal-overlay" id="modal-cheese" onclick="closeOnOverlay(event, 'cheese')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Cheese Roll</h2>
+        <p> 25 menit &nbsp;·&nbsp;  8 pcs</p>
+      </div>
+      <button class="btn-close" onclick="closeModal('cheese')">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <h3>Bahan-Bahan</h3>
+      <ul class="ingredients-list">
+        <li>8 lembar kulit lumpia</li>
+        <li>4 slice keju cheddar</li>
+        <li>2 sdm keju parut</li>
+        <li>Tepung terigu basah</li>
+        <li>Minyak untuk goreng</li>
+      </ul>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <h3>Cara Membuat</h3>
+      <ol class="steps-list">
+        <li><span>Siapkan lembaran kulit lumpia.</span></li>
+        <li><span>Letakkan setengah slice keju cheddar di tepi kulit lumpia. Taburi sedikit keju parut.</span></li>
+        <li><span>Gulung kulit lumpia dengan rapat. Gunakan tepung basah untuk perekat.</span></li>
+        <li><span>Goreng dengan minyak sampai matang.</span></li>
+        <li><span>Angkat, siap dimakan.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PISCOK -->
+<div class="modal-overlay" id="modal-piscok" onclick="closeOnOverlay(event, 'piscok')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Piscok</h2>
+        <p>20 menit &nbsp;·&nbsp; 6 pcs</p>
+      </div>
+      <button class="btn-close" onclick="closeModal('piscok')">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <h3>Bahan-Bahan</h3>
+      <ul class="ingredients-list">
+        <li>3 buah pisang (potong dua)</li>
+        <li>6 lembar kulit lumpia</li>
+        <li>4 sdm cokelat meses</li>
+        <li>2 sdm susu kental manis</li>
+        <li>1 sdm mentega</li>
+        <li>1 putih telur (untuk perekat)</li>
+        <li>Minyak goreng secukupnya</li>
+        <li>Gula halus (taburan, opsional)</li>
+      </ul>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <h3>Cara Membuat</h3>
+      <ol class="steps-list">
+        <li><span>Campurkan meses dan susu kental manis dalam mangkuk kecil, aduk rata menjadi pasta cokelat.</span></li>
+        <li><span>Bentangkan satu lembar kulit lumpia di permukaan datar.</span></li>
+        <li><span>Letakkan satu potong pisang di dekat tepi kulit, beri 1 sdm pasta cokelat di atas pisang.</span></li>
+        <li><span>Lipat kedua sisi kulit ke dalam, lalu gulung rapat dari bawah ke atas. Olesi ujungnya dengan putih telur dan rekatkan.</span></li>
+        <li><span>Ulangi untuk semua pisang.</span></li>
+        <li><span>Panaskan minyak goreng dengan api sedang. Goreng piscok hingga kulit berwarna cokelat keemasan dan renyah, sekitar 3–4 menit.</span></li>
+        <li><span>Angkat dan tiriskan. Taburi gula halus jika suka.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BAKWAN -->
+<div class="modal-overlay" id="modal-bakwan" onclick="closeOnOverlay(event, 'bakwan')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Bakwan</h2>
+        <p>25 menit &nbsp;·&nbsp; 4 porsi</p>
+      </div>
+      <button class="btn-close" onclick="closeModal('bakwan')">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <h3>Bahan-Bahan</h3>
+      <ul class="ingredients-list">
+        <li>Sayuran: Wortel, kol, dan daun bawang</li>
+        <li>15 sdm tepung terigu</li>
+        <li>3 sdm tepung beras</li>
+        <li>3 siung bawang putih</li>
+        <li>Garam, merica, kaldu bubuk secukupnya </li>
+        <li>Air dingin secukupnya</li>
+      </ul>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <h3>Cara Membuat</h3>
+      <ol class="steps-list">
+        <li><span>Campur tepung, bumbu halus, dan air dingin sedikit demi sedikit.</span></li>
+        <li><span>Masukkan telur dan air sedikit demi sedikit, aduk hingga adonan licin dan kental.</span></li>
+        <li><span>Masukan sayuran, aduk rata.</span></li>
+        <li><span>Panaskan minyak. Ambil adonan dengan sendok sayur. Lalu goreng.</span></li>
+        <li><span>Balik bakwan sekali saja. Angkat setelah kuning keemasan ,  tiriskan, siap dimakan.</span></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal(id) {
+    document.getElementById('modal-' + id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById('modal-' + id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function closeOnOverlay(event, id) {
+    if (event.target === event.currentTarget) closeModal(id);
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(el => {
+        el.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
